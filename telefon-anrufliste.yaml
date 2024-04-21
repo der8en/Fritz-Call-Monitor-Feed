@@ -41,7 +41,7 @@ action:
       - service: input_text.set_value
         data:
           value: >-
-            <font color="#8BBF68;"><ha-icon icon="mdi:phone-outgoing">
+            <font color="#8BBF68"><ha-icon icon="mdi:phone-outgoing">
             </ha-icon></font> Gespräch mit {{
             state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
@@ -72,7 +72,7 @@ action:
       - service: input_text.set_value
         data:
           value: >-
-            <font color="#268DDA;"><ha-icon icon="mdi:phone-incoming">
+            <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
             </ha-icon></font> Anruf von
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
@@ -87,7 +87,7 @@ action:
       - service: input_text.set_value
         data:
           value: >-
-            <font color="#E3603B;"><ha-icon icon="mdi:phone-missed">
+            <font color="#E3603B"><ha-icon icon="mdi:phone-missed">
             </ha-icon></font> Verpasster Anruf von
             {{states("input_text.telefon_klingelt")}}
         target:
