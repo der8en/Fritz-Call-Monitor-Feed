@@ -1,0 +1,96 @@
+alias: Telefon Anrufliste
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+    id: "1"
+    from: dialing
+    to: talking
+    alias: ausgehend
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+    id: "2"
+    to: ringing
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+    alias: klingelt
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+    id: "3"
+    from: ringing
+    to: talking
+    alias: ankommend
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+    id: "4"
+    from: ringing
+    to: idle
+    alias: verpasst
+condition: []
+action:
+  - if:
+      - condition: trigger
+        id: "1"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            <font color="#8BBF68;"><ha-icon icon="mdi:phone-outgoing">
+            </ha-icon></font> Gespräch mit {{
+            state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
+            ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
+            "with_name")}})
+        target:
+          entity_id: input_text.telefon_feed
+    alias: Ausgehend
+  - if:
+      - condition: trigger
+        id:
+          - "2"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
+            ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
+            "from_name")}})
+        target:
+          entity_id: input_text.telefon_klingelt
+    alias: Klingelt
+  - alias: Ankommend
+    if:
+      - condition: trigger
+        id:
+          - "3"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            <font color="#268DDA;"><ha-icon icon="mdi:phone-incoming">
+            </ha-icon></font> Anruf von
+            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
+            ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
+            "with_name")}})
+        target:
+          entity_id: input_text.telefon_feed
+  - if:
+      - condition: trigger
+        id:
+          - "4"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            <font color="#E3603B;"><ha-icon icon="mdi:phone-missed">
+            </ha-icon></font> Verpasster Anruf von
+            {{states("input_text.telefon_klingelt")}}
+        target:
+          entity_id: input_text.telefon_feed
+    alias: Verpasst
+mode: single
