@@ -1,5 +1,4 @@
 alias: Telefon Anrufliste
-description: ""
 trigger:
   - platform: state
     entity_id:
@@ -8,7 +7,8 @@ trigger:
     from: dialing
     to: talking
     alias: ausgehend
-  - platform: state
+  - alias: klingelt
+    platform: state
     entity_id:
       - sensor.fritz_box_7490_anrufmonitor_telefonbuch
     id: "2"
@@ -17,7 +17,6 @@ trigger:
       hours: 0
       minutes: 0
       seconds: 2
-    alias: klingelt
   - platform: state
     entity_id:
       - sensor.fritz_box_7490_anrufmonitor_telefonbuch
@@ -32,9 +31,25 @@ trigger:
     from: ringing
     to: idle
     alias: verpasst
-condition: []
+condition:
+  - condition: or
+    conditions:
+      - condition: trigger
+        id:
+          - "1"
+          - "2"
+      - condition: and
+        conditions:
+          - condition: trigger
+            id:
+              - "3"
+              - "4"
+          - condition: state
+            entity_id: input_boolean.telefon_klingelt
+            state: "on"
 action:
-  - if:
+  - alias: Ausgehend
+    if:
       - condition: trigger
         id: "1"
     then:
@@ -48,12 +63,17 @@ action:
             "with_name")}})
         target:
           entity_id: input_text.telefon_feed
-    alias: Ausgehend
-  - if:
+  - alias: Klingelt
+    if:
       - condition: trigger
         id:
           - "2"
     then:
+      - service: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.telefon_klingelt
       - service: input_text.set_value
         data:
           value: >-
@@ -61,8 +81,7 @@ action:
             ({{ state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",    
             "from_name")}})
         target:
-          entity_id: input_text.telefon_klingelt
-    alias: Klingelt
+          entity_id: input_text.telefon_anrufer
   - alias: Ankommend
     if:
       - condition: trigger
@@ -79,7 +98,13 @@ action:
             "with_name")}})
         target:
           entity_id: input_text.telefon_feed
-  - if:
+      - service: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.telefon_klingelt
+  - alias: Verpasst
+    if:
       - condition: trigger
         id:
           - "4"
@@ -92,5 +117,9 @@ action:
             {{states("input_text.telefon_klingelt")}}
         target:
           entity_id: input_text.telefon_feed
-    alias: Verpasst
+      - service: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.telefon_klingelt
 mode: single
