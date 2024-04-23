@@ -14,8 +14,10 @@ Die Automatisierung bassiert auf der von [MeinedigitaleWelt](https://youtu.be/w0
 - AVM FRITZ!Box Call Monitor Integration
 - HACS -> [Lovelace Home Feed Card](https://github.com/gadgetchnnel/lovelace-home-feed-card)
 - 2 Helfer vom Typ "Text" (Maximale Länge 250)
-  - `telefon_klingelt`
+  - `telefon_anrufer`
   - `telefon_feed`
+- 1 Helfer vom Typ "Schalter"
+  - `telefon_klingelt`
  
 ## Automatisierung
 Inhalt der [telefon-anrufliste.yaml](/telefon-anrufliste.yaml) kopieren und als neue Automatisierung im YAML-Mode einfügen.
