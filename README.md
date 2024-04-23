@@ -23,7 +23,10 @@ Die Automatisierung bassiert auf der von [MeinedigitaleWelt](https://youtu.be/w0
 Inhalt der [telefon-anrufliste.yaml](/telefon-anrufliste.yaml) kopieren und als neue Automatisierung im YAML-Mode einfügen.
 Der Teil "sensor.fritz_box_7490_anrufmonitor_telefonbuch" muss überall an den eigenen Entitätsnamen angepast werden!
 
-Der Trigger "klingelt" mit ID 2 hat eine mindest Klingeldauer von 2 Sekunden. Wird diese Zeit reduziert/entfernt, werden geblockte Anrufer als verpasster Anruf angezeigt.
+Der Trigger "klingelt" mit ID 2 hat eine Mindestklingeldauer von 2 Sekunden. Wird diese Zeit reduziert/entfernt, werden geblockte Anrufer als verpasster Anruf angezeigt.  
+Der Nachteil ist, wenn man das Telefon in unter 2 Sekunden abnimmt, wird dieser Anruf nicht getrackt! _(Kommt bei mir nie vor)_  
+
+Wer keine Blockliste hat, kann die Zeit auch auf null setzen.
 
 ## Beispiel Home Feed Card
 ```
