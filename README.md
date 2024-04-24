@@ -37,15 +37,15 @@ Wird diese Zeit reduziert/entfernt, werden geblockte Anrufer als verpasster Anru
 Das ist die Voreinstellung in der YAML. Hier muss nichts weiter angepasst werden.
 
 ### AB nach X Sekunden
-_Diese Variante habe ich nicht selbst getestet, sollte aber funktionieren._   
-- den Trigger "Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)" aktivieren (3-Punkte Menü)
-- im Trigger die Zeit, nachdem der eigene AB aktiviert, weniger 1 Sekunde, eintragen (unten unter "Für")  
+Man kann leider nicht feststellen, ob jemand eine Nachricht hinterlässt, da der AB als normales Telefonat gewertet wird. Aber man kann nachverfolgen, ob es überhaupt lange genug geklingelt hat, damit der Anrufer den AB hört.
+- den Trigger "Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)" aktivieren (im 3-Punkte Menü)
+- im Trigger die Zeit, nachdem der eigene AB aktiviert, weniger 1 Sekunde, eintragen (unten bei "Für")  
 Beispiel: Euer AB aktiviert sich nach 50 Sekunden, dann tragt ihr hier 0:00:49 ein.
 
 ### AB außerhalb bestimmter Zeiten
 z.B. Geschäftszeiten.
 - unter "Dann mache"
-  - "V1: Ankommend (ohne Geschäftszeiten)" deaktivieren (3-Punkte Menü)
+  - "V1: Ankommend (ohne Geschäftszeiten)" deaktivieren (im 3-Punkte Menü)
   - "V2: Ankommend (innerhalb Geschäftszeiten)" aktivieren
   - "V2: AB (außerhalb Geschäftszeiten)" aktivieren
 - die Zeiten/Tage anpassen
