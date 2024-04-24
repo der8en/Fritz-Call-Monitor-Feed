@@ -10,9 +10,11 @@ Die Idee zur Automatisierung bassiert auf der von [MeinedigitaleWelt](https://yo
 - Anrufbeantworter nach X Sekunden
 - Anrufbeantworter in bestimmten Zeiten
 - unerwünschte Anrufer von Blocklisten (z.B. von Phoneblock.net) werden nicht als verpasste Anrufer angezeigt
+- keine doppelten Einträge für den gleichen Anruf
+- wiederholdene Anrufer werden auch mehrfach Angezeigt
 
 ## Voraussetzungen
-- [AVM FRITZ!Box Call Monitor Integration](https://www.home-assistant.io/integrations/fritzbox_callmonitor/)
+- [AVM FRITZ!Box Call Monitor Integration](https://www.home-assistant.io/integrations/fritzbox_callmonitor/) _(`#96*5*` nicht vergessen!)_
 - HACS -> [Lovelace Home Feed Card](https://github.com/gadgetchnnel/lovelace-home-feed-card)
 - 2 Helfer vom Typ "Text" (Maximale Länge 250)
   - `telefon_anrufer`
@@ -53,11 +55,17 @@ AB außerhalb bestimmter Zeiten z.B. Geschäftszeiten
 Damit diese Variante gemeinsam mit den 2 Sekunden Mindestklingeldauer funktioniert, sollte die Anrufannahme in der Fritz!Box auf 5 Sekunden oder mehr eingestellt sein!
 
 ## Beispiel Home Feed Card
+Wichtige Einstellungen:
+- show_icons: false _(damit nicht zwei Icons angezeigt werden)_
+- history_days_back: 5 _(max. vergange Tage)_
+- include_history: true
+- remove_repeats: false _(damit wiederholende Anrufer Angezeigt werden)_
+- max_history: 3 _(max. Anzahl Einträge)_
+
 ```
 type: custom:home-feed-card
 title: Anrufe
 card_id: main_feed
-show_empty: false
 show_icons: false
 id_filter: ^home_feed_.*
 history_days_back: 5
@@ -65,7 +73,7 @@ entities:
   - entity: input_text.telefon_feed
     name: Telefon-Feed
     include_history: true
+    remove_repeats: false
     max_history: 3
     content_template: '{{state}}'
-
 ```
