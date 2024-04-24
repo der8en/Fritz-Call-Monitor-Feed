@@ -21,7 +21,9 @@ Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://you
   - `telefon_feed`
 - 1 Helfer vom Typ "Schalter"
   - `telefon_klingelt`
- 
+
+![Helfer](https://github.com/der8en/Fritz-Call-Monitor-Feed/assets/19150585/1fe21548-7a7a-4ac1-a208-17dc2261dc9a)
+
 ## Grundlagen
 Inhalt der [telefon-anrufliste.yaml](/telefon-anrufliste.yaml) kopieren und als neue Automatisierung im YAML-Mode einfügen.
 Der Teil "sensor.fritz_box_7490_anrufmonitor_telefonbuch" muss überall an den **eigenen Entitätsnamen angepasst** werden!
@@ -31,19 +33,17 @@ Der Trigger "klingelt" mit ID 2 hat eine Mindestklingeldauer von 2 Sekunden. Der
 
 Wird diese Zeit reduziert/entfernt, werden geblockte Anrufer als verpasster Anruf angezeigt. Wer keine Blockliste hat, kann die Zeit auch auf null setzen.
 
-### Variante 1:
-Die einfache Variante ohne AB.  
+### ohne Anrufbeantworter
 Das ist die Voreinstellung in der YAML. Hier muss nichts weiter angepasst werden.
 
-### Variante 2:
-AB nach X Sekunden.  
+### AB nach X Sekunden
 _Diese Variante habe ich nicht selbst getestet, sollte aber funktionieren._   
 - den Trigger "Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)" aktivieren (3-Punkte Menü)
 - im Trigger die Zeit, nachdem der eigene AB aktiviert, weniger 1 Sekunde, eintragen (unten unter "Für")  
 Beispiel: Euer AB aktiviert sich nach 50 Sekunden, dann tragt ihr hier 0:00:49 ein.
 
-### Variante 3:
-AB außerhalb bestimmter Zeiten, z.B. Geschäftszeiten.
+### AB außerhalb bestimmter Zeiten
+z.B. Geschäftszeiten.
 - unter "Dann mache"
   - "V1: Ankommend (ohne Geschäftszeiten)" deaktivieren (3-Punkte Menü)
   - "V2: Ankommend (innerhalb Geschäftszeiten)" aktivieren
@@ -54,7 +54,7 @@ AB außerhalb bestimmter Zeiten, z.B. Geschäftszeiten.
  
 Damit diese Variante gemeinsam mit den 2 Sekunden Mindestklingeldauer funktioniert, sollte die Anrufannahme in der Fritz!Box auf 5 Sekunden oder mehr eingestellt sein!
 
-## Beispiel Home Feed Card
+## Home Feed Card
 Wichtige Einstellungen:
 - show_icons: false _(damit nicht zwei Icons angezeigt werden)_
 - history_days_back: 5 _(max. vergangene Tage)_
@@ -62,6 +62,7 @@ Wichtige Einstellungen:
 - remove_repeats: false _(damit wiederholende Anrufer angezeigt werden)_
 - max_history: 3 _(max. Anzahl Einträge)_
 
+Beispiel:
 ```
 type: custom:home-feed-card
 title: Anrufe
@@ -77,3 +78,22 @@ entities:
     max_history: 3
     content_template: '{{state}}'
 ```
+
+## Benachrichtigungen
+sind nicht enthalten, können aber leicht hinzugefügt werden.  
+Unter "Dann mache" die Aktion heraussuchen, bei der benachrichtigt werden soll.
+1. Aktion hinzufügen
+2. Benachrichtigung
+3. Typ/Gerät auswählen
+4. im 3-Punkte Menü -> Als YAML bearbeiten
+5. data-Code einfügen
+
+evtl. noch Text anpassen
+
+Beispiel für verpasste Anrufe:
+```
+service: notify.deine_entität
+data:
+  message: Verpasster Anruf von {{states("input_text.telefon_anrufer")}}
+```
+
