@@ -252,7 +252,7 @@ action:
           value: >-
             <font color="#E3603B"><ha-icon icon="mdi:phone-missed">
             </ha-icon></font> Verpasster Anruf von
-            {{states("input_text.telefon_klingelt")}}
+            {{states("input_text.telefon_anrufer")}}
         target:
           entity_id: input_text.telefon_feed
       - service: input_boolean.turn_off
