@@ -32,16 +32,16 @@ trigger:
     from: ringing
     to: idle
     alias: verpasst
-  - platform: state
+  - alias: Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)
+    platform: state
     entity_id:
       - sensor.fritz_box_7490_anrufmonitor_telefonbuch
     to: ringing
     for:
       hours: 0
       minutes: 0
-      seconds: 30
+      seconds: 49
     enabled: false
-    alias: Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)
     id: "5"
   - alias: Feed bereinigen
     platform: state
@@ -85,9 +85,9 @@ action:
             </ha-icon></font> Gespräch mit
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name") == "unknown") %}(Unbekannt{% else
+            "with_name") != "unknown")
             %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name")}}{% endif %})
+            "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
   - alias: Klingelt
@@ -106,9 +106,9 @@ action:
           value: >-
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
             {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "from_name") == "unknown") %}(Unbekannt{% else
+            "from_name") != "unknown")
             %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "from_name")}}{% endif %})
+            "from_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_anrufer
   - alias: "V1: Ankommend (ohne Geschäftszeiten)"
@@ -124,9 +124,9 @@ action:
             </ha-icon></font> Anruf von
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name") == "unknown") %}(Unbekannt{% else
+            "with_name") != "unknown")
             %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name")}}{% endif %})
+            "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
       - service: input_boolean.turn_off
@@ -164,9 +164,9 @@ action:
             </ha-icon></font> Anruf von
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name") == "unknown") %}(Unbekannt{% else
+            "with_name") != "unknown")
             %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name")}}{% endif %})
+            "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
       - service: input_boolean.turn_off
@@ -207,9 +207,9 @@ action:
             </ha-icon></font> Anruf auf AB von
             {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
             {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name") == "unknown") %}(Unbekannt{% else
+            "with_name") != "unknown")
             %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "with_name")}}{% endif %})
+            "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
       - service: input_boolean.turn_off
@@ -218,29 +218,6 @@ action:
         target:
           entity_id: input_boolean.telefon_klingelt
     enabled: false
-  - alias: AB nach X Sekunden
-    if:
-      - condition: trigger
-        id:
-          - "5"
-    then:
-      - service: input_text.set_value
-        data:
-          value: >-
-            <font color="#268DDA"><ha-icon icon="mdi:phone-message">
-            </ha-icon></font> Anruf auf AB von
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "from_name") == "unknown") %}(Unbekannt{% else
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
-            "from_name")}}{% endif %})
-        target:
-          entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.telefon_klingelt
   - alias: Verpasst
     if:
       - condition: trigger
@@ -260,7 +237,31 @@ action:
         data: {}
         target:
           entity_id: input_boolean.telefon_klingelt
-  - if:
+  - alias: AB nach X Sekunden
+    if:
+      - condition: trigger
+        id:
+          - "5"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            <font color="#268DDA"><ha-icon icon="mdi:phone-message">
+            </ha-icon></font> Anruf auf AB von
+            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
+            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            "from_name") != "unknown")
+            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            "from_name")}}){% endif %}
+        target:
+          entity_id: input_text.telefon_feed
+      - service: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.telefon_klingelt
+  - alias: Feed bereinigen
+    if:
       - condition: trigger
         id:
           - "6"
@@ -269,6 +270,8 @@ action:
         data:
           value: unknown
         target:
-          entity_id: input_text.telefon_feed
-    alias: Feed bereinigen
+          entity_id:
+            - input_text.telefon_feed
+trace:
+  stored_traces: 15
 mode: single
