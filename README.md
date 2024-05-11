@@ -67,6 +67,7 @@ Beispiel:
 type: custom:home-feed-card
 title: Anrufe
 card_id: card_telefon_feed
+id_filter: ^home_feed_.*
 show_icons: false
 history_days_back: 5
 entities:
