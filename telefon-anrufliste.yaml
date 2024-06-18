@@ -1,9 +1,9 @@
 alias: Telefon Anrufliste
-description: Anleitung unter https://github.com/der8en/Fritz-Call-Monitor-Feed
+description: v1.1 - Anleitung unter https://github.com/der8en/Fritz-Call-Monitor-Feed
 trigger:
   - platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     id: "1"
     from: dialing
     to: talking
@@ -11,7 +11,7 @@ trigger:
   - alias: klingelt
     platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     id: "2"
     to: ringing
     for:
@@ -20,14 +20,14 @@ trigger:
       seconds: 2
   - platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     id: "3"
     from: ringing
     to: talking
     alias: ankommend
   - platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     id: "4"
     from: ringing
     to: idle
@@ -35,7 +35,7 @@ trigger:
   - alias: Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)
     platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     to: ringing
     for:
       hours: 0
@@ -46,7 +46,7 @@ trigger:
   - alias: Feed bereinigen
     platform: state
     entity_id:
-      - sensor.fritz_box_7490_anrufmonitor_telefonbuch
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     for:
       hours: 0
       minutes: 0
@@ -54,6 +54,19 @@ trigger:
     to: idle
     id: "6"
     enabled: true
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
+    to: dialing
+    alias: wählen
+    id: "7"
+  - platform: state
+    entity_id:
+      - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
+    from: dialing
+    to: idle
+    id: "8"
+    alias: nicht angenommen
 condition:
   - condition: or
     conditions:
@@ -63,6 +76,8 @@ condition:
           - "2"
           - "5"
           - "6"
+          - "7"
+          - "8"
       - condition: and
         conditions:
           - condition: trigger
@@ -83,10 +98,11 @@ action:
           value: >-
             <font color="#8BBF68"><ha-icon icon="mdi:phone-outgoing">
             </ha-icon></font> Gespräch mit
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
@@ -104,10 +120,11 @@ action:
       - service: input_text.set_value
         data:
           value: >-
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","from")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "from_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "from_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_anrufer
@@ -122,10 +139,11 @@ action:
           value: >-
             <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
             </ha-icon></font> Anruf von
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
@@ -162,10 +180,11 @@ action:
           value: >-
             <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
             </ha-icon></font> Anruf von
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
@@ -205,10 +224,11 @@ action:
           value: >-
             <font color="#E3603B"><ha-icon icon="mdi:phone-lock">
             </ha-icon></font> Anruf auf AB von
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","with")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
@@ -248,10 +268,11 @@ action:
           value: >-
             <font color="#268DDA"><ha-icon icon="mdi:phone-message">
             </ha-icon></font> Anruf auf AB von
-            {{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch","from")}}
-            {% if (state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","from")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "from_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7490_anrufmonitor_telefonbuch",
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
             "from_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
@@ -272,6 +293,37 @@ action:
         target:
           entity_id:
             - input_text.telefon_feed
+  - alias: wählen
+    if:
+      - condition: trigger
+        id:
+          - "7"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","to")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
+            "to_name") != "unknown")
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
+            "to_name")}}){% endif %}
+        target:
+          entity_id: input_text.telefon_anrufer
+  - alias: nicht angenommen
+    if:
+      - condition: trigger
+        id:
+          - "8"
+    then:
+      - service: input_text.set_value
+        data:
+          value: >-
+            <font color="#E3603B"><ha-icon icon="mdi:phone-remove">
+            </ha-icon></font> Nicht angenommenes Telefonat mit
+            {{states("input_text.telefon_anrufer")}}
+        target:
+          entity_id: input_text.telefon_feed
+mode: single
 trace:
   stored_traces: 15
-mode: single
