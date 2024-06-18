@@ -26,7 +26,7 @@ Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://you
 
 ## Grundlagen
 Inhalt der [telefon-anrufliste.yaml](/telefon-anrufliste.yaml) kopieren und als neue Automatisierung im YAML-Mode einfügen.
-Der Teil "sensor.fritz_box_7490_anrufmonitor_telefonbuch" muss überall an den **eigenen Entitätsnamen angepasst** werden!
+Der Teil "sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch" muss überall an den **eigenen Entitätsnamen angepasst** werden!
 Am besten in einem Texteditor mit "Suchen und ersetzen" erledigen.
 
 Der Trigger "klingelt" mit ID 2 hat eine Mindestklingeldauer von 2 Sekunden. Der Nachteil ist, wenn man das Telefon in unter 2 Sekunden abnimmt, wird dieser Anruf nicht getrackt! _(Kommt bei mir nie vor)_  
@@ -56,6 +56,7 @@ Damit diese Variante gemeinsam mit den 2 Sekunden Mindestklingeldauer funktionie
 
 ## Home Feed Card
 Wichtige Einstellungen:
+- id_filter: ^home_feed_.* _(damit nur Anruf-Benachrichtigungen angezeigt werden)_
 - show_icons: false _(damit nicht zwei Icons angezeigt werden)_
 - history_days_back: 5 _(max. vergangene Tage)_
 - include_history: true
