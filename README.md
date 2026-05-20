@@ -15,7 +15,7 @@ Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://you
 - wiederholte Anrufer werden auch mehrfach angezeigt
 
 ## Voraussetzungen
-- [AVM FRITZ!Box Call Monitor Integration](https://www.home-assistant.io/integrations/fritzbox_callmonitor/) _(`#96*5*` nicht vergessen!)_
+- [FRITZ!Box Call Monitor Integration](https://www.home-assistant.io/integrations/fritzbox_callmonitor/) _(`#96*5*` nicht vergessen!)_
 - 2 Helfer vom Typ "Text" (Maximale Länge 250)
   - `telefon_anrufer`
   - `telefon_feed`
