@@ -1,7 +1,8 @@
+
 # FRITZ!Box Call Monitor-Feed
 **Home Assistant Automatisierung um die Anrufliste der Fritz!Box im Dashboard als Karte anzuzeigen.**
 
-![der8en-fritz-feed-card](https://github.com/der8en/Fritz-Call-Monitor-Feed/assets/19150585/70f41327-5564-4da9-a3bf-d1fcd3a147b6)
+<img width="643" height="530" alt="Fritz Call Monitor Feed" src="https://github.com/user-attachments/assets/edadf948-34cc-4916-82cc-68f8c4bcfe75" />
 
 Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://youtu.be/w062jGwby_4). Vielen Dank dafür!
 
@@ -15,12 +16,48 @@ Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://you
 
 ## Voraussetzungen
 - [AVM FRITZ!Box Call Monitor Integration](https://www.home-assistant.io/integrations/fritzbox_callmonitor/) _(`#96*5*` nicht vergessen!)_
-- HACS -> [Lovelace Home Feed Card](https://github.com/gadgetchnnel/lovelace-home-feed-card)
 - 2 Helfer vom Typ "Text" (Maximale Länge 250)
   - `telefon_anrufer`
   - `telefon_feed`
 - 1 Helfer vom Typ "Schalter"
   - `telefon_klingelt`
+- folgendes Template in der `configuration.yaml`:
+```
+template:
+  - trigger:
+      - platform: state
+        entity_id: input_text.telefon_feed
+        # Ignoriere Neustarts von Home Assistant (Wechsel von 'unavailable')
+        not_from:
+          - "unavailable"
+        # Ignoriere, wenn der Status ZU unbekannt/leer wechselt.
+        not_to:
+          - "unknown"
+          - "unavailable"
+          - ""
+    sensor:
+      - name: "Telefon Feed Verlauf"
+        unique_id: telefon_feed_verlauf
+        state: "{{ trigger.to_state.state | truncate(250) }}"
+        attributes:
+          verlauf: >
+            {% set neu_wert = trigger.to_state.state %}
+            {% set neu_zeit = now().isoformat() %}
+            {% set alt_verlauf = this.attributes.get('verlauf', []) %}
+            
+            {% set ns = namespace(liste=[]) %}
+            
+            {# Alte Einträge übernehmen #}
+            {% for eintrag in alt_verlauf %}
+              {% if eintrag is mapping and 'zeit' in eintrag %}
+                {% set ns.liste = ns.liste + [eintrag] %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Neuen Eintrag oben anfügen, als JSON speichern und auf 20 Einträge begrenzen #}
+            {{ ([{"zeit": neu_zeit, "wert": neu_wert}] + ns.liste)[:20] | to_json }}
+```
+In der letzten Zeile kann über [:20] die maximale Anzahl der gespeicherten Einträge festgelegt werden. Standardmäßig sind 20 Einträge vorgesehen; zu hohe Werte können sich jedoch negativ auf die Ladezeit auswirken.
 
 ![Helfer](https://github.com/der8en/Fritz-Call-Monitor-Feed/assets/19150585/1fe21548-7a7a-4ac1-a208-17dc2261dc9a)
 
@@ -54,30 +91,85 @@ z.B. Geschäftszeiten.
  
 Damit diese Variante gemeinsam mit den 2 Sekunden Mindestklingeldauer funktioniert, sollte die Anrufannahme in der Fritz!Box auf 5 Sekunden oder mehr eingestellt sein!
 
-## Home Feed Card
-Wichtige Einstellungen:
-- id_filter: ^home_feed_.* _(damit nur Anruf-Benachrichtigungen angezeigt werden)_
-- show_icons: false _(damit nicht zwei Icons angezeigt werden)_
-- history_days_back: 5 _(max. vergangene Tage)_
-- include_history: true
-- remove_repeats: false _(damit wiederholende Anrufer angezeigt werden)_
-- max_history: 3 _(max. Anzahl Einträge)_
-
-Beispiel:
+## Markdown Karte
+In Zeile 3 lässt sich die maximale Anzahl der angezeigten Einträge festlegen. Dieser Wert kann unabhängig von den im Template gespeicherten Einträgen nach Bedarf auch niedriger gewählt werden. Voreingestellt sind 20.
 ```
-type: custom:home-feed-card
-title: Anrufe
-card_id: card_telefon_feed
-id_filter: ^home_feed_.*
-show_icons: false
-history_days_back: 5
-entities:
-  - entity: input_text.telefon_feed
-    name: Telefon-Feed
-    include_history: true
-    remove_repeats: false
-    max_history: 3
-    content_template: '{{state}}'
+type: markdown
+content: |-
+  {%- set max_eintraege = 20 -%}{# maximale Anzahl der Einträge #}
+  {%- set wochentage = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] -%}
+  {%- set anrufe = state_attr('sensor.telefon_feed_verlauf', 'verlauf') -%} 
+
+  {%- if anrufe -%}
+    {%- set ns = namespace(zaehler=0) -%}
+    {%- for anruf in anrufe -%}
+      {%- if ns.zaehler < max_eintraege -%}
+        {%- if anruf.wert not in ['unknown', 'unavailable', ''] -%}
+          {%- set ns.zaehler = ns.zaehler + 1 -%}
+          {%- set anruf_ts = as_timestamp(anruf.zeit) -%}
+          {%- set jetzt_ts = as_timestamp(now()) -%}
+          
+          {# Zeitdifferenzen und Datum für den Heute-Vergleich ermitteln #}
+          {%- set diff_minuten = ((jetzt_ts - anruf_ts) / 60) | int -%}
+          {%- set diff_tage = ((jetzt_ts - anruf_ts) / 86400) | int -%}
+          {%- set heute_datum = jetzt_ts | timestamp_custom('%Y-%m-%d') -%}
+          {%- set anruf_datum = anruf_ts | timestamp_custom('%Y-%m-%d') -%}
+          
+          {{ anruf.wert | trim }}<br>
+          
+          {%- if diff_minuten < 60 and diff_minuten >= 0 -%}
+            {%- if diff_minuten == 1 -%}vor 1 Minute
+            {%- elif diff_minuten == 0 -%}gerade eben
+            {%- else -%}vor {{ diff_minuten }} Minuten
+            {%- endif -%}
+          {%- else -%}
+            {%- set wochentag = wochentage[anruf_ts | timestamp_custom('%w') | int] -%}
+            
+            {# 3-stufige Abfrage für Heute, 7-Tage und Älter #}
+            {%- if heute_datum == anruf_datum -%}
+              um {{ anruf_ts | timestamp_custom('%-H:%M') }} Uhr
+            {%- elif diff_tage <= 6 -%}
+              am {{ wochentag }}, {{ anruf_ts | timestamp_custom('%-H:%M') }} Uhr
+            {%- else -%}
+              am {{ wochentag }}, {{ anruf_ts | timestamp_custom('%-d.%-m. %-H:%M') }} Uhr
+            {%- endif -%}
+            
+          {%- endif -%}
+          
+          {%- if ns.zaehler < max_eintraege and not loop.last -%}
+          <hr>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    
+    {%- if ns.zaehler == 0 %}
+      Keine gültigen Anrufe.
+    {%- endif %}
+  {%- else %}
+    Keine Anrufe.
+  {%- endif %}
+```
+
+### Optional:
+[card-mod](https://github.com/thomasloven/lovelace-card-mod)
+
+Beispiel, wie sich die Farbe und der Abstand der Trennlinie anpassen lassen sowie die Höhe der Karte begrenzt wird, damit der Inhalt innerhalb der Karte scrollbar ist.
+```
+card_mod:
+  style:
+    ha-markdown $: |
+      hr {
+        border-top: 1px solid var(--primary-text-color) !important; /* Farbe Trennlinie */
+        margin: 10px 0 !important; /* Abstand Trennlinie */
+      }
+      p {
+        margin: 0; /* Abstand erste Trennlinie */
+      }
+    .: |
+      ha-card {
+        max-height: 15rem; /* maximale Höhe */
+        overflow-y: auto;
 ```
 
 ## Benachrichtigungen
