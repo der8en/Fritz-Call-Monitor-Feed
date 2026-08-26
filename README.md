@@ -25,7 +25,7 @@ Die Idee zur Automatisierung basiert auf der von [MeinedigitaleWelt](https://you
 ```
 template:
   - trigger:
-      - platform: state
+      - trigger: state
         entity_id: input_text.telefon_feed
         # Ignoriere Neustarts von Home Assistant (Wechsel von 'unavailable')
         not_from:
