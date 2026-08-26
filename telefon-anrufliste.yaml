@@ -1,50 +1,51 @@
 alias: Telefon Anrufliste
-description: v1.1 - Anleitung unter https://github.com/der8en/Fritz-Call-Monitor-Feed
-trigger:
-  - platform: state
+description: v1.2 - Anleitung unter https://github.com/der8en/Fritz-Call-Monitor-Feed
+triggers:
+  - trigger: state
+    alias: ausgehend
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
-    id: "1"
+    id: '1'
     from: dialing
     to: talking
-    alias: ausgehend
-  - alias: klingelt
-    platform: state
+  - trigger: state
+    alias: klingelt
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
-    id: "2"
+    id: '2'
     to: ringing
     for:
       hours: 0
       minutes: 0
       seconds: 2
-  - platform: state
+  - trigger: state
+    alias: ankommend
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
-    id: "3"
+    id: '3'
     from: ringing
     to: talking
-    alias: ankommend
-  - platform: state
+  - trigger: state
+    alias: verpasst
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
-    id: "4"
+    id: '4'
     from: ringing
     to: idle
-    alias: verpasst
-  - alias: Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)
-    platform: state
+  - trigger: state
+    alias: Zeit für AB nach X Sekunden (abzgl. 1 Sekunde)
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
-    to: ringing
+    to:
+      - ringing
     for:
       hours: 0
       minutes: 0
-      seconds: 49
-    enabled: false
-    id: "5"
-  - alias: Feed bereinigen
-    platform: state
+      seconds: 24
+    enabled: true
+    id: '5'
+  - trigger: state
+    alias: Feed bereinigen
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     for:
@@ -52,48 +53,48 @@ trigger:
       minutes: 0
       seconds: 2
     to: idle
-    id: "6"
+    id: '6'
     enabled: true
-  - platform: state
+  - trigger: state
+    alias: wählen
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     to: dialing
-    alias: wählen
-    id: "7"
-  - platform: state
+    id: '7'
+  - trigger: state
+    alias: nicht angenommen
     entity_id:
       - sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch
     from: dialing
     to: idle
-    id: "8"
-    alias: nicht angenommen
-condition:
+    id: '8'
+conditions:
   - condition: or
     conditions:
       - condition: trigger
         id:
-          - "1"
-          - "2"
-          - "5"
-          - "6"
-          - "7"
-          - "8"
+          - '1'
+          - '2'
+          - '5'
+          - '6'
+          - '7'
+          - '8'
       - condition: and
         conditions:
           - condition: trigger
             id:
-              - "3"
-              - "4"
+              - '3'
+              - '4'
           - condition: state
             entity_id: input_boolean.telefon_klingelt
-            state: "on"
-action:
+            state: 'on'
+actions:
   - alias: Ausgehend
     if:
       - condition: trigger
-        id: "1"
+        id: '1'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#8BBF68"><ha-icon icon="mdi:phone-outgoing">
@@ -110,14 +111,14 @@ action:
     if:
       - condition: trigger
         id:
-          - "2"
+          - '2'
     then:
-      - service: input_boolean.turn_on
+      - action: input_boolean.turn_on
         metadata: {}
         data: {}
         target:
           entity_id: input_boolean.telefon_klingelt
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","from")}}
@@ -128,13 +129,13 @@ action:
             "from_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_anrufer
-  - alias: "V1: Ankommend (ohne Geschäftszeiten)"
+  - alias: 'V1: Ankommend (ohne Geschäftszeiten)'
     if:
       - condition: trigger
         id:
-          - "3"
+          - '3'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
@@ -147,63 +148,22 @@ action:
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.telefon_klingelt
-    enabled: true
-  - alias: "V2: Ankommend (innerhalb Geschäftszeiten)"
-    if:
-      - condition: trigger
-        id:
-          - "3"
-      - condition: or
-        conditions:
-          - condition: time
-            after: "08:00:00"
-            before: "18:30:00"
-            weekday:
-              - mon
-              - tue
-              - wed
-              - thu
-              - fri
-          - condition: time
-            after: "08:00:00"
-            before: "13:30:00"
-            weekday:
-              - sat
-    then:
-      - service: input_text.set_value
-        data:
-          value: >-
-            <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
-            </ha-icon></font> Anruf von
-            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
-            {% if
-            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
-            "with_name") != "unknown")
-            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
-            "with_name")}}){% endif %}
-        target:
-          entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
+      - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
           entity_id: input_boolean.telefon_klingelt
     enabled: false
-  - alias: "V2: AB (außerhalb Geschäftszeiten)"
+  - alias: 'V2: Ankommend (innerhalb Geschäftszeiten)'
     if:
       - condition: trigger
         id:
-          - "3"
+          - '3'
       - condition: or
         conditions:
           - condition: time
-            after: "18:30:00"
-            before: "08:00:00"
+            after: '08:00:00'
+            before: '18:30:00'
             weekday:
               - mon
               - tue
@@ -211,15 +171,56 @@ action:
               - thu
               - fri
           - condition: time
-            after: "13:30:00"
-            before: "08:00:00"
+            after: '08:00:00'
+            before: '13:30:00'
+            weekday:
+              - sat
+    then:
+      - action: input_text.set_value
+        data:
+          value: >-
+            <font color="#268DDA"><ha-icon icon="mdi:phone-incoming">
+            </ha-icon></font> Anruf von
+            {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","with")}}
+            {% if
+            (state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
+            "with_name") != "unknown")
+            %}({{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch",
+            "with_name")}}){% endif %}
+        target:
+          entity_id: input_text.telefon_feed
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.telefon_klingelt
+    enabled: true
+  - alias: 'V2: AB (außerhalb Geschäftszeiten)'
+    if:
+      - condition: trigger
+        id:
+          - '3'
+      - condition: or
+        conditions:
+          - condition: time
+            after: '18:30:00'
+            before: '08:00:00'
+            weekday:
+              - mon
+              - tue
+              - wed
+              - thu
+              - fri
+          - condition: time
+            after: '13:30:00'
+            before: '08:00:00'
             weekday:
               - sat
           - condition: time
             weekday:
               - sun
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#E3603B"><ha-icon icon="mdi:phone-lock">
@@ -232,19 +233,19 @@ action:
             "with_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
+      - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
           entity_id: input_boolean.telefon_klingelt
-    enabled: false
+    enabled: true
   - alias: Verpasst
     if:
       - condition: trigger
         id:
-          - "4"
+          - '4'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#E3603B"><ha-icon icon="mdi:phone-missed">
@@ -252,7 +253,7 @@ action:
             {{states("input_text.telefon_anrufer")}}
         target:
           entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
+      - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
@@ -261,9 +262,25 @@ action:
     if:
       - condition: trigger
         id:
-          - "5"
+          - '5'
+      - condition: or
+        conditions:
+          - condition: time
+            after: '08:30:00'
+            before: '18:00:00'
+            weekday:
+              - mon
+              - tue
+              - wed
+              - thu
+              - fri
+          - condition: time
+            after: '08:30:00'
+            before: '13:00:00'
+            weekday:
+              - sat
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#268DDA"><ha-icon icon="mdi:phone-message">
@@ -276,7 +293,7 @@ action:
             "from_name")}}){% endif %}
         target:
           entity_id: input_text.telefon_feed
-      - service: input_boolean.turn_off
+      - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
@@ -285,9 +302,9 @@ action:
     if:
       - condition: trigger
         id:
-          - "6"
+          - '6'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: unknown
         target:
@@ -297,9 +314,9 @@ action:
     if:
       - condition: trigger
         id:
-          - "7"
+          - '7'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             {{state_attr("sensor.fritz_box_7590_ax_anrufmonitor_telefonbuch","to")}}
@@ -314,9 +331,9 @@ action:
     if:
       - condition: trigger
         id:
-          - "8"
+          - '8'
     then:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           value: >-
             <font color="#E3603B"><ha-icon icon="mdi:phone-remove">
